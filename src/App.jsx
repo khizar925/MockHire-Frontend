@@ -1,15 +1,45 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import LandingPage from './Pages/LandingPage'
+import { Routes, Route } from "react-router-dom";
+import { SignIn, SignUp } from "@clerk/clerk-react";
+
+import LandingPage from "./Pages/LandingPage";
+import Layout from "./Pages/Layout";
+import About from "./Pages/About";
+import AuthPageWrapper from "./components/AuthPageWrapper";
+import DashBoard from "./Pages/Dashboard";
+import FAQ from "./Pages/FAQ";
+import Feedback from "./Pages/Feedback";
+import Contact from "./Pages/Contact";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<LandingPage />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<LandingPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/dashboard" element={<DashBoard/>} />
+        <Route path="/faq" element={<FAQ/>} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/contact" element={<Contact/>} />
+      </Route>
+
+      <Route
+        path="/sign-in/*"
+        element={
+          <AuthPageWrapper>
+            <SignIn routing="path" path="/sign-in" afterSignInUrl="/dashboard" />
+          </AuthPageWrapper>
+        }
+      />
+      <Route
+        path="/sign-up/*"
+        element={
+          <AuthPageWrapper>
+            <SignUp routing="path" path="/sign-up" afterSignUpUrl="/dashboard"/>
+          </AuthPageWrapper>
+        }
+      />
+    </Routes>
   );
 }
-
 
 export default App;
