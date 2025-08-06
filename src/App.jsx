@@ -9,6 +9,7 @@ import DashBoard from "./Pages/Dashboard";
 import FAQ from "./Pages/FAQ";
 import Feedback from "./Pages/Feedback";
 import Contact from "./Pages/Contact";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<LandingPage />} />
         <Route path="/about" element={<About />} />
-        <Route path="/dashboard" element={<DashBoard/>} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashBoard/></ProtectedRoute>} />
         <Route path="/faq" element={<FAQ/>} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/contact" element={<Contact/>} />
