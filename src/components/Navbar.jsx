@@ -1,10 +1,11 @@
-import HelperNavbar from "./ui/Helper-Navbar"
-import { Link } from "react-router-dom"
-import { ShimmerButton } from "./ui/shimmer-button"
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react"
-import { useNavigate } from "react-router-dom"
+
+import HelperNavbar from "./ui/Helper-Navbar";
+import { Link } from "react-router-dom";
+import { ShimmerButton } from "./ui/shimmer-button";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+
 export default function Navbar() {
-    const navigate = useNavigate();
+
     return (
         <div>
             <div className="flex items-center justify-between px-6 flex-wrap gap-4">
@@ -16,30 +17,31 @@ export default function Navbar() {
                     </div>
                 </Link>
 
-                {/* Navbar visible only on lg and above */}
+                {/* Navbar links - center aligned on sm and above */}
                 <div className="hidden sm:flex flex-1 justify-center">
                     <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl">
                         <HelperNavbar />
                     </div>
                 </div>
 
-
-                {/* Get Started Button */}
-                <div>
+                {/* Auth Buttons */}
+                <div className="w-[100px] min-h-[40px] flex justify-end items-center">
                     <SignedOut>
-                        <Link to={"/sign-in"}>
-                            <ShimmerButton className="shadow-2xl">
-                                <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
+                        <Link to="/sign-in" className="w-full">
+                            <ShimmerButton className="w-full sm:w-auto shadow-2xl">
+                                <span className="whitespace-nowrap text-center text-sm font-medium leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                                     Login
                                 </span>
                             </ShimmerButton>
                         </Link>
                     </SignedOut>
                     <SignedIn>
-                        <UserButton />
+                        <div className="w-full flex justify-end">
+                            <UserButton afterSignOutUrl="/" />
+                        </div>
                     </SignedIn>
                 </div>
             </div>
         </div>
-    )
+    );
 }

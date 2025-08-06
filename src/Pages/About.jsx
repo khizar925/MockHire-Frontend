@@ -14,7 +14,7 @@ function About() {
     return (
         <div className="w-full">
             <div className="container mx-auto">
-                <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
+                <div className="flex gap-8 py-24 lg:py-44 items-center justify-center flex-col">
                     <div>
                         <AnimatedButton>
                             About MockHire
@@ -46,7 +46,7 @@ function About() {
                     >
                         {/* Why MockHire */}
                         <div className="text-center">
-                            <h2 className="text-2xl md:text-3xl font-semibold mb-6">Why MockHire?</h2>
+                            <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-blue-500">Why MockHire?</h2>
                             <div className="grid md:grid-cols-2 gap-4 text-left">
                                 {benefits.map((benefit, index) => (
                                     <div key={index} className="flex items-start gap-3 p-4 rounded-lg bg-muted/20">

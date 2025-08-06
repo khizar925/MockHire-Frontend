@@ -38,7 +38,7 @@ function Hero() {
                     <div className="flex gap-4 flex-col">
                         <h1 className="text-5xl md:text-7xl max-w-2xl tracking-tighter text-center font-regular">
                             <span className="text-spektr-cyan-50">MockHire is a</span>
-                            <span className="relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1">
+                            <span className="relative flex w-full justify-center overflow-hidden text-center text-blue-500 md:pb-4 md:pt-1">
                                 &nbsp;
                                 {titles.map((title, index) => (
                                     <motion.span
@@ -67,7 +67,7 @@ function Hero() {
                     </div>
 
                     <div className="flex flex-row gap-3">
-                        <Button size="lg" className="gap-4" variant="outline">
+                        <Button size="lg" className="gap-4 bg-blue-400" variant="outline">
                             Jump on a call <PhoneCall className="w-4 h-4" />
                         </Button>
                         <SignedOut>

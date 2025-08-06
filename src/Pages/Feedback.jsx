@@ -29,7 +29,7 @@ export default function Feedback() {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-neutral-50 px-4">
+        <div className="flex justify-center items-center h-[92vh] px-4">
             <Card className="w-full max-w-md shadow-xl">
                 <CardHeader>
                     <CardTitle className="text-center text-neutral-800">Feedback Form</CardTitle>
@@ -89,7 +89,7 @@ export default function Feedback() {
                         </div>
                         <Button
                             type="submit"
-                            className="w-full focus:outline-none focus:ring-0 focus:border-none"
+                            className="w-full focus:outline-none focus:ring-0 focus:border-none bg-blue-500 hover:bg-blue-400"
                         >
                             Submit Feedback
                         </Button>

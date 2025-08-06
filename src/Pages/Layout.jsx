@@ -4,7 +4,12 @@ import Navbar from "../components/Navbar";
 
 export default function Layout() {
     return (
-        <div style={{ minHeight: "100vh" }}>
+        <div
+            className="min-h-screen bg-cover bg-no-repeat bg-center"
+            style={{
+                backgroundImage: "linear-gradient(to bottom, white, #dbeafe, white)",
+            }}
+        >
             <Navbar />
             <Outlet />
         </div>

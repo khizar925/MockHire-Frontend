@@ -17,11 +17,11 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<LandingPage />} />
         <Route path="/about" element={<About />} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashBoard/></ProtectedRoute>} />
         <Route path="/faq" element={<FAQ/>} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/contact" element={<Contact/>} />
       </Route>
+      <Route path="/dashboard" element={<ProtectedRoute><DashBoard/></ProtectedRoute>} />
 
       <Route
         path="/sign-in/*"
