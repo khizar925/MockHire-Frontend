@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { MoveRight, PhoneCall } from "lucide-react";
 import { Link } from "react-router-dom"
 import { Button } from "./button-21";
-import { SignedOut } from "@clerk/clerk-react";
+import { SignedIn , SignedOut } from "@clerk/clerk-react";
 
 function Hero() {
     const [titleNumber, setTitleNumber] = useState(0);
@@ -58,7 +58,7 @@ function Hero() {
                             </span>
                         </h1>
 
-                        <p className="text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-2xl text-center">
+                        <p className="text-lg p-12 sm:p-2 md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-2xl text-center">
                             MockHire is a real-time AI voice interview simulator built with React and Node.js.
                             Practice interviews with an intelligent AI agent, receive instant feedback,
                             and sharpen your communication skills — making it the smartest prep tool
@@ -66,10 +66,17 @@ function Hero() {
                         </p>
                     </div>
 
-                    <div className="flex flex-row gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <Button size="lg" className="gap-4 bg-blue-400" variant="outline">
                             Jump on a call <PhoneCall className="w-4 h-4" />
                         </Button>
+                        <SignedIn>
+                            <Link to="/dashboard">
+                                <Button size="lg" className="gap-4">
+                                    Open Dashboard <MoveRight className="w-4 h-4" />
+                                </Button>
+                            </Link>
+                        </SignedIn>
                         <SignedOut>
                             <Link to="/sign-up">
                                 <Button size="lg" className="gap-4">

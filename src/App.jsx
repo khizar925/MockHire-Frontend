@@ -10,6 +10,7 @@ import FAQ from "./Pages/FAQ";
 import Feedback from "./Pages/Feedback";
 import Contact from "./Pages/Contact";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Interview from "./Pages/Interview";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/contact" element={<Contact/>} />
       </Route>
       <Route path="/dashboard" element={<ProtectedRoute><DashBoard/></ProtectedRoute>} />
+      <Route path="/interview" element={<ProtectedRoute><Interview/></ProtectedRoute>} />
 
       <Route
         path="/sign-in/*"

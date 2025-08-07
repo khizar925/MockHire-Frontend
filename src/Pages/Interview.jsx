@@ -1,0 +1,127 @@
+import { useState } from "react";
+import { useUser, UserButton } from "@clerk/clerk-react";
+import { Button } from "../components/ui/button";
+import { Link } from "react-router-dom";
+
+export default function Interview() {
+  const { user } = useUser();
+
+  // 🔊 Speaking state
+  const [botSpeaking, setBotSpeaking] = useState(false);
+  const [userSpeaking, setUserSpeaking] = useState(false);
+
+  return (
+    <div
+      className="min-h-screen px-2 sm:px-4 py-4"
+      style={{
+        backgroundImage:
+          "linear-gradient(to bottom, white 0%, #dbeafe 50%, white 100%)",
+        backgroundRepeat: "repeat-y",
+        backgroundSize: "100% 1000px",
+      }}
+    >
+      {/* Header */}
+      <header>
+        <div className="flex items-center justify-between px-2 sm:px-6 flex-wrap gap-2 sm:gap-4">
+          <Link to="/">
+            <div className="flex items-center space-x-2 py-4">
+              <img
+                src="/logo.svg"
+                alt="MockHire Logo"
+                className="h-10 sm:h-12 w-auto"
+              />
+              <span className="text-lg sm:text-xl font-bold text-gray-800">
+                MockHire
+              </span>
+            </div>
+          </Link>
+
+          <div className="min-h-[40px] flex justify-end items-center">
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: {
+                    width: "40px",
+                    height: "40px",
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Interview Title and Type */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full max-w-[1140px] mx-auto mt-4 gap-4">
+        <div className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
+          <img src="/trial.png" alt="Logo" className="w-6 h-8 sm:w-9 sm:h-9" />
+          <div>Frontend Developer Interview</div>
+        </div>
+        <Button variant={"outline"} className="w-full hidden sm:block sm:w-auto">
+          Technical Interview
+        </Button>
+      </div>
+
+      {/* Main Section */}
+      <div className="flex flex-col gap-6 items-center w-full max-w-[1140px] mx-auto mt-8 sm:mt-12 md:mt-16 lg:mt-20 xl:mt-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          {/* AI Interviewer */}
+          <div className="bg-[#f1f5f9] text-black rounded-2xl p-6 flex flex-col justify-center items-center shadow-lg relative">
+            <div
+              className={`w-24 h-24 [@media(min-width:320px)]:w-28 [@media(min-width:320px)]:h-28 [@media(min-width:375px)]:w-32 [@media(min-width:375px)]:h-32 [@media(min-width:425px)]:w-80 [@media(min-width:425px)]:h-80 rounded-full border-4 border-white ${botSpeaking ? "animate-pulse ring-4 ring-indigo-500" : ""}`}>
+              <img
+                src="data:image/png;base64,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"
+                alt="AI"
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+            <p className="mt-4 text-lg sm:text-xl font-medium">AI Interviewer</p>
+          </div>
+
+          {/* User */}
+          <div className="bg-[#f1f5f9] text-black rounded-2xl p-6 flex flex-col justify-center items-center shadow-lg relative">
+            <div
+              className={`w-24 h-24 sm:w-80 sm:h-80 rounded-full border-4 border-white ${userSpeaking ? "animate-pulse ring-4 ring-green-500" : ""
+                }`}
+            >
+              <img
+                src={user?.imageUrl}
+                alt="User"
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+            <p className="mt-4 text-lg sm:text-xl font-medium">
+              {user?.fullName || "You"}
+            </p>
+          </div>
+        </div>
+
+        {/* Subtitle */}
+        <div className="m-4 p-4 w-full font-bold text-lg sm:text-xl rounded-xl bg-gray-100 text-center border border-white-200">
+          Subtitles
+        </div>
+
+        {/* Leave Interview Button */}
+        <div className="shadow-md w-full sm:w-auto text-center">
+          <Button variant="destructive" className="w-full sm:w-48">
+            Leave Interview
+          </Button>
+        </div>
+
+        {/* Toggle Buttons */}
+        {/* <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+          <Button onClick={() => setBotSpeaking(!botSpeaking)}>
+            {botSpeaking ? "Stop Bot Speaking" : "Start Bot Speaking"}
+          </Button>
+          <Button
+            onClick={() => setUserSpeaking(!userSpeaking)}
+            variant="secondary"
+          >
+            {userSpeaking ? "Stop User Speaking" : "Start User Speaking"}
+          </Button>
+        </div> */}
+      </div>
+    </div>
+  );
+
+}
