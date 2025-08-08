@@ -18,12 +18,12 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<LandingPage />} />
         <Route path="/about" element={<About />} />
-        <Route path="/faq" element={<FAQ/>} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="/feedback" element={<Feedback />} />
-        <Route path="/contact" element={<Contact/>} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashBoard /></ProtectedRoute>} />
       </Route>
-      <Route path="/dashboard" element={<ProtectedRoute><DashBoard/></ProtectedRoute>} />
-      <Route path="/interview" element={<ProtectedRoute><Interview/></ProtectedRoute>} />
+      <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
 
       <Route
         path="/sign-in/*"
@@ -37,7 +37,7 @@ function App() {
         path="/sign-up/*"
         element={
           <AuthPageWrapper>
-            <SignUp routing="path" path="/sign-up" afterSignUpUrl="/dashboard"/>
+            <SignUp routing="path" path="/sign-up" afterSignUpUrl="/dashboard" />
           </AuthPageWrapper>
         }
       />

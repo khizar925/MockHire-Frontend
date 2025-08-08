@@ -3,13 +3,34 @@ import { Button } from '../components/ui/button';
 import { Link } from "react-router-dom";
 import PastInterviewCard from "../components/PastInterviewCard";
 import InterviewCard from "../components/InterviewCard";
+import { useEffect, useState } from "react";
+import axios from 'axios';
+import InterviewForm from "../components/InterviewForm";
+
+
+const SERVER_ORIGIN = import.meta.env.VITE_SERVER_ORIGIN;
 
 export default function Dashboard() {
+  const [interviews, setInterviews] = useState([]);
+  const [modalshow, setModalShow] = useState(false);
+
+  useEffect(() => {
+    try {
+      const fetchInterviews = async () => {
+        const response = await axios.get(`${SERVER_ORIGIN}/api/interviews`);
+
+        setInterviews(response.data.data);
+      }
+      fetchInterviews();
+    } catch (error) {
+      console.log(error)
+    }
+  }, []);
   return (
-    <div className="px-2 sm:px-4 py-4" style={{backgroundImage: "linear-gradient(to bottom, white 0%, #dbeafe 50%, white 100%)",backgroundRepeat: "repeat-y",backgroundSize: "100% 1000px",}}>
-      
+    <div className="px-2 sm:px-4 py-4" style={{ backgroundImage: "linear-gradient(to bottom, white 0%, #dbeafe 50%, white 100%)", backgroundRepeat: "repeat-y", backgroundSize: "100% 1000px", }}>
+
       {/* Header */}
-      <header>
+      {/* <header>
         <div className="flex items-center justify-between px-2 sm:px-6 flex-wrap gap-2 sm:gap-4">
           <Link to="/">
             <div className="flex items-center space-x-2 py-4">
@@ -31,7 +52,7 @@ export default function Dashboard() {
             />
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Hero Section */}
       <div className="w-full max-w-[1140px] mx-auto mt-1 rounded-[20px] p-4 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -44,10 +65,15 @@ export default function Dashboard() {
           <p className="mt-3 text-gray-500 text-sm sm:text-base md:text-lg">
             Practice real interview questions & get instant feedback.
           </p>
-          <Button className="mt-4 px-4 py-2 text-sm sm:text-base font-medium rounded-full bg-blue-500 hover:bg-blue-400 text-white">
-            Start an Interview
-          </Button>
+          <div onClick={() => setModalShow(true)}>
+            <Button className="mt-4 px-4 py-2 text-sm sm:text-base font-medium rounded-full bg-blue-500 hover:bg-blue-400 text-white">
+              Start an Interview
+            </Button>
+          </div>
         </div>
+
+        {/* Interview form */}
+        {modalshow && <InterviewForm onClose={() => setModalShow(false)} interviewData={interviews} />}
 
         {/* Right */}
         <div className="flex-1 flex justify-center">
@@ -71,17 +97,19 @@ export default function Dashboard() {
       </div>
 
       {/* Pick Your Interview */}
-      <div className="w-full max-w-[1140px] mx-auto mt-8 rounded-[20px] p-4 sm:p-6">
-        <h2 className="text-xl sm:text-3xl font-bold text-gray-800 mb-4">
-          Pick Your Interview
-        </h2>
-        <br />
-        <div className="flex flex-wrap gap-4 sm:gap-6 justify-center md:justify-start">
-          <InterviewCard />
-          <InterviewCard />
-          <InterviewCard />
+      <section id="interviews">
+        <div className="w-full max-w-[1140px] mx-auto mt-8 rounded-[20px] p-4 sm:p-6">
+          <h2 className="text-xl sm:text-3xl font-bold text-gray-800 mb-4">
+            Pick Your Interview
+          </h2>
+          <br />
+          <div className="flex flex-wrap gap-4 sm:gap-6 justify-center md:justify-start">
+            {(interviews.length <= 0) ? (<div>No Interview Found. Refresh Database.</div>) : (interviews.map((interview) => (
+              <InterviewCard key={interview.id} interview={interview} />
+            )))}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
