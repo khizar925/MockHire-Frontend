@@ -102,7 +102,10 @@ export default function Interview() {
         </div>
 
         {/* Leave Interview Button */}
-        <div className="shadow-md w-full sm:w-auto text-center">
+        <div className="w-full sm:w-auto text-center">
+            <Button className="w-full sm:w-48 m-4">
+              Start Interview
+            </Button>
           <Button variant="destructive" className="w-full sm:w-48">
             Leave Interview
           </Button>
