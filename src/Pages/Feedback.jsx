@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star } from "lucide-react";
+
+const SERVER_ORIGIN = import.meta.env.VITE_SERVER_ORIGIN;
 
 export default function Feedback() {
     const [formData, setFormData] = useState({
@@ -13,6 +16,8 @@ export default function Feedback() {
         message: "",
         rating: 0,
     });
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -22,10 +27,32 @@ export default function Feedback() {
         setFormData((prev) => ({ ...prev, rating }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Feedback Submitted:", formData);
-        // TODO: send to backend or API
+
+        if (!formData.name || !formData.email || !formData.message || !formData.rating) {
+            setMessage("Fill All Fields!");
+            setTimeout(() => setMessage(""), 3000);
+            return; // ✅ Stop execution if fields are missing
+        }
+
+        try {
+            setLoading(true);
+            const response = await axios.post(`${SERVER_ORIGIN}/api/feedback`, formData);
+
+            if (response.status === 200 || response.status === 201) {
+                setMessage("✅ Feedback submitted successfully!");
+                setFormData({ name: "", email: "", message: "", rating: 0 });
+            } else {
+                setMessage("❌ Failed to submit feedback.");
+            }
+        } catch (error) {
+            setMessage("❌ Error submitting feedback.");
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setTimeout(() => setMessage(""), 3000);
+        }
     };
 
     return (
@@ -44,7 +71,6 @@ export default function Feedback() {
                                 placeholder="Your name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="focus:outline-none focus:ring-0 focus:border-none"
                             />
                         </div>
                         <div className="space-y-2">
@@ -56,7 +82,6 @@ export default function Feedback() {
                                 placeholder="you@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="focus:outline-none focus:ring-0 focus:border-none"
                             />
                         </div>
                         <div className="space-y-2">
@@ -67,7 +92,6 @@ export default function Feedback() {
                                 placeholder="Share your thoughts..."
                                 value={formData.message}
                                 onChange={handleChange}
-                                className="focus:outline-none focus:ring-0 focus:border-none"
                             />
                         </div>
                         <div className="space-y-2">
@@ -77,9 +101,7 @@ export default function Feedback() {
                                     <Star
                                         key={star}
                                         size={24}
-                                        className={`cursor-pointer transition-colors ${star <= formData.rating
-                                                ? "text-yellow-500"
-                                                : "text-neutral-400"
+                                        className={`cursor-pointer transition-colors ${star <= formData.rating ? "text-yellow-500" : "text-neutral-400"
                                             }`}
                                         onClick={() => handleRating(star)}
                                         fill={star <= formData.rating ? "currentColor" : "none"}
@@ -87,11 +109,15 @@ export default function Feedback() {
                                 ))}
                             </div>
                         </div>
+                        <div className={`${message.includes("❌") ? "text-red-500" : "text-green-600"}`}>
+                            {message}
+                        </div>
                         <Button
                             type="submit"
-                            className="w-full focus:outline-none focus:ring-0 focus:border-none bg-blue-500 hover:bg-blue-400"
+                            className="w-full bg-blue-500 hover:bg-blue-400"
+                            disabled={loading}
                         >
-                            Submit Feedback
+                            {loading ? "Submitting..." : "Submit Feedback"}
                         </Button>
                     </form>
                 </CardContent>

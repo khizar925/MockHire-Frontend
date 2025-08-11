@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getRandomInterviewCover } from "../utils"; // Adjust as needed
-import { CalendarDays, Star } from "lucide-react"; // Optional: replace with your icon set
+import { getRandomInterviewCover } from "../utils";
+import { CalendarDays, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
 
 export default function InterviewCard({ interview }) {
+    const title = interview.title.toLowerCase().trim().replace(/\s+/g, "_");
     const [cover, setCover] = useState("");
     const techIcons = {
         // 💻 Technical (updated for dark background)
@@ -34,8 +35,7 @@ export default function InterviewCard({ interview }) {
     const fallbackNonTechnicalIcons = ["Communication", "Leadership"];
     const isTechnical = interview.tech_stack.length > 0;
     const displayTechs = isTechnical ? interview.tech_stack : fallbackNonTechnicalIcons;
-
-
+    
     useEffect(() => {
         const randomCover = getRandomInterviewCover();
         setCover(randomCover);
@@ -82,7 +82,7 @@ export default function InterviewCard({ interview }) {
 
                 {/* Button */}
                 <div className="pt-2">
-                    <Link to={"/interview"}>
+                    <Link to={`/role/${title}`}>
                         <button className="bg-[#a78bfa] text-black text-sm font-medium px-4 py-2 rounded-full hover:bg-[#c4b5fd] transition">
                             View interview
                         </button>

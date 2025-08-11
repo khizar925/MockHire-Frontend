@@ -11,6 +11,9 @@ import Feedback from "./Pages/Feedback";
 import Contact from "./Pages/Contact";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Interview from "./Pages/Interview";
+import ErrorPage from "./Pages/ErrorPage" 
+import Result from "./Pages/Results"
+import Role from "./Pages/Role";
 
 function App() {
   return (
@@ -21,9 +24,12 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/*" element={<ErrorPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashBoard /></ProtectedRoute>} />
       </Route>
       <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
+      <Route path="/role/:title" element={<ProtectedRoute><Role /></ProtectedRoute>} />
+      <Route path="/result" element={<ProtectedRoute><Result /></ProtectedRoute>} />
 
       <Route
         path="/sign-in/*"

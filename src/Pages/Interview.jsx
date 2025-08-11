@@ -1,14 +1,227 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser, UserButton } from "@clerk/clerk-react";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import Vapi from "@vapi-ai/web";
+
+const SERVER_ORIGIN = import.meta.env.VITE_SERVER_ORIGIN;
 
 export default function Interview() {
   const { user } = useUser();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const formState = (location && location.state) || {};
+
+  if (!formState || Object.keys(formState).length === 0) {
+    navigate("/dashboard");
+  }
+
+  const PUBLIC_VAPI_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY;
+  const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID;
+  const VAPI_WORKFLOW_ID = import.meta.env.VITE_VAPI_WORKFLOW_ID;
 
   // 🔊 Speaking state
   const [botSpeaking, setBotSpeaking] = useState(false);
   const [userSpeaking, setUserSpeaking] = useState(false);
+  const [isCalling, setIsCalling] = useState(false);
+  const [fullTranscript, setFullTranscript] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [micPermission, setMicPermission] = useState("unknown");
+  const [loading, setLoading] = useState(false);
+
+  const vapiRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const transcriptRef = useRef([]);
+
+  const assistantVariables = useMemo(() => {
+    // Pass dashboard selections and user data as variables for the assistant
+    const variables = {
+      role: formState?.role || "",
+      difficulty: formState?.difficulty || "",
+      duration: formState?.duration || "",
+      resumeText: formState?.resumeText || "",
+      userName: user?.fullName || user?.firstName || "",
+      userEmail: user?.primaryEmailAddress?.emailAddress || "",
+      userId: user?.id || "",
+    };
+    return variables;
+  }, [formState, user]);
+
+  useEffect(() => {
+    // When botSpeaking becomes true, stop loading and clear timeout
+    if (botSpeaking && loading) {
+      setLoading(false);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    }
+  }, [botSpeaking, loading, navigate]);
+
+  useEffect(() => {
+    if (!PUBLIC_VAPI_KEY) {
+      console.warn("VITE_VAPI_PUBLIC_KEY not set. Vapi will be disabled.");
+      return;
+    }
+    vapiRef.current = new Vapi(PUBLIC_VAPI_KEY);
+
+    const vapi = vapiRef.current;
+
+    const handleCallStart = () => {
+      setIsCalling(true);
+      setErrorMsg("");
+      transcriptRef.current = [];
+      setFullTranscript("");
+    };
+    const handleCallEnd = () => {
+      setIsCalling(false);
+      setBotSpeaking(false);
+      setUserSpeaking(false);
+      const joined = (transcriptRef.current || []).join("\n");
+      setFullTranscript(joined);
+    };
+    const handleSpeechStart = (e) => {
+      if (e?.user) setUserSpeaking(true);
+      else setBotSpeaking(true);
+    };
+    const handleSpeechEnd = (e) => {
+      if (e?.user) setUserSpeaking(false);
+      else setBotSpeaking(false);
+    };
+    const handleTranscript = (msg) => {
+      const isFinal = msg?.transcriptType ? msg.transcriptType === "final" : msg?.type === "transcript";
+      if (!isFinal) return;
+      const speaker = msg?.speaker || msg?.role || (msg?.user ? "User" : "Interviewer");
+      const text = msg?.transcript || msg?.text || "";
+      if (text) transcriptRef.current.push(`${speaker}: ${text}`);
+    };
+    const handleMessage = (msg) => handleTranscript(msg);
+
+    const handleError = (err) => {
+      const message = (typeof err === 'string' ? err : err?.message) || 'Unknown Vapi error';
+      // eslint-disable-next-line no-console
+      console.error('Vapi error event:', err);
+      setErrorMsg(message);
+      navigate("/dashboard");
+    };
+
+    vapi.on("call-start", handleCallStart);
+    vapi.on("call-end", handleCallEnd);
+    vapi.on("speech-start", handleSpeechStart);
+    vapi.on("speech-end", handleSpeechEnd);
+    vapi.on("message", handleMessage);
+    vapi.on("error", handleError);
+
+    return () => {
+      vapi.off("call-start", handleCallStart);
+      vapi.off("call-end", handleCallEnd);
+      vapi.off("speech-start", handleSpeechStart);
+      vapi.off("speech-end", handleSpeechEnd);
+      vapi.off("message", handleMessage);
+      vapi.off("error", handleError);
+      try { vapi.stop(); } catch (_) { }
+    };
+  }, [PUBLIC_VAPI_KEY]);
+
+  // Request microphone access on page load so the browser prompts immediately
+  useEffect(() => {
+    const requestMic = async () => {
+      if (!navigator?.mediaDevices?.getUserMedia) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setMicPermission("granted");
+        stream.getTracks().forEach((t) => t.stop());
+      } catch (_err) {
+        setMicPermission("denied");
+        setErrorMsg("Microphone permission is required to start the interview.");
+      }
+    };
+    requestMic();
+  }, []);
+
+  const startInterview = async () => {
+    if (!vapiRef.current) return;
+    try {
+      setErrorMsg("");
+      setLoading(true);
+      timeoutRef.current = setTimeout(() => {
+        setLoading(false);
+        if (!botSpeaking) {
+          navigate("/dashboard");
+        }
+      }, 50000);
+      // Prefer Assistant ID when available. If not, try Workflow ID with variableValues
+      if (VAPI_ASSISTANT_ID) {
+        try {
+          await vapiRef.current.start(VAPI_ASSISTANT_ID, { variableValues: assistantVariables });
+        } catch (errPrimary) {
+          // Fallback to options-object signature (some SDK versions)
+          await vapiRef.current.start({
+            assistantId: VAPI_ASSISTANT_ID,
+            assistantOverrides: { variableValues: assistantVariables },
+          });
+        }
+      } else if (VAPI_WORKFLOW_ID) {
+        try {
+          await vapiRef.current.start(undefined, undefined, undefined, VAPI_WORKFLOW_ID, {
+            variableValues: assistantVariables,
+          });
+        } catch (errPrimary) {
+          await vapiRef.current.start({
+            workflowId: VAPI_WORKFLOW_ID,
+            variableValues: assistantVariables,
+          });
+        }
+      } else {
+        throw new Error("Missing VAPI assistant or workflow ID");
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to start interview", error);
+      setErrorMsg((error && error.message) || "Failed to start interview");
+      setLoading(false); // stop loading on error
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    }
+  };
+
+  const stopInterview = async () => {
+    if (!vapiRef.current) return;
+
+    try {
+      // Step 1: Stop the interview
+      await vapiRef.current.stop();
+
+      // Step 2: Ensure transcript is fully joined after stop completes
+      const joinedTranscript = (transcriptRef.current || []).join("\n");
+      setFullTranscript(joinedTranscript);
+
+      // Step 3: Ask backend for analysis
+      const response = await fetch(`${SERVER_ORIGIN}/api/transcript`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: joinedTranscript }),
+      });
+
+      if (!response.ok) throw new Error("Failed to get interview analysis");
+
+      const analysisResult = await response.json();
+
+      // Step 4: Navigate ONLY after analysis is received
+      navigate("/result", {
+        state: {
+          analysis: analysisResult,
+          transcript: joinedTranscript
+        }
+      });
+
+    } catch (error) {
+      console.error("Failed to stop interview or fetch analysis", error);
+    }
+  };
 
   return (
     <div
@@ -55,16 +268,13 @@ export default function Interview() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full max-w-[1140px] mx-auto mt-4 gap-4">
         <div className="flex items-center gap-2 font-semibold text-xl sm:text-2xl">
           <img src="/trial.png" alt="Logo" className="w-6 h-8 sm:w-9 sm:h-9" />
-          <div>Frontend Developer Interview</div>
+          <div>{formState.role} Interview</div>
         </div>
-        <Button variant={"outline"} className="w-full hidden sm:block sm:w-auto">
-          Technical Interview
-        </Button>
       </div>
 
       {/* Main Section */}
-      <div className="flex flex-col gap-6 items-center w-full max-w-[1140px] mx-auto mt-8 sm:mt-12 md:mt-16 lg:mt-20 xl:mt-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+      <div className="flex flex-col gap-6 items-center w-full max-w-[600px] mx-auto mt-8 sm:mt-12 md:mt-16 lg:mt-20 xl:mt-24">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full">
           {/* AI Interviewer */}
           <div className="bg-[#f1f5f9] text-black rounded-2xl p-6 flex flex-col justify-center items-center shadow-lg relative">
             <div
@@ -77,54 +287,49 @@ export default function Interview() {
             </div>
             <p className="mt-4 text-lg sm:text-xl font-medium">AI Interviewer</p>
           </div>
+        </div>
 
-          {/* User */}
-          <div className="bg-[#f1f5f9] text-black rounded-2xl p-6 flex flex-col justify-center items-center shadow-lg relative">
-            <div
-              className={`w-24 h-24 sm:w-80 sm:h-80 rounded-full border-4 border-white ${userSpeaking ? "animate-pulse ring-4 ring-green-500" : ""
-                }`}
+        {/* Transcript will be collected silently and saved on end; no live subtitles */}
+        {errorMsg ? (
+          <div className="w-full max-w-[1140px] mx-auto text-center text-sm text-red-600">{errorMsg}</div>
+        ) : null}
+        {micPermission !== "granted" ? (
+          <div className="w-full max-w-[1140px] mx-auto text-center text-sm text-amber-700">
+            Please enable microphone access when prompted. If you dismissed it, click
+            <button
+              className="ml-1 underline"
+              onClick={async () => {
+                try {
+                  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                  setMicPermission("granted");
+                  stream.getTracks().forEach((t) => t.stop());
+                  setErrorMsg("");
+                } catch (_err) {
+                  setMicPermission("denied");
+                  setErrorMsg("Microphone permission is required to start the interview.");
+                }
+              }}
             >
-              <img
-                src={user?.imageUrl}
-                alt="User"
-                className="w-full h-full rounded-full object-cover"
-              />
-            </div>
-            <p className="mt-4 text-lg sm:text-xl font-medium">
-              {user?.fullName || "You"}
-            </p>
+              Enable Microphone
+            </button>
           </div>
-        </div>
+        ) : null}
 
-        {/* Subtitle */}
-        <div className="m-4 p-4 w-full font-bold text-lg sm:text-xl rounded-xl bg-gray-100 text-center border border-white-200">
-          Subtitles
-        </div>
-
-        {/* Leave Interview Button */}
+        {/* Interview Control Buttons */}
         <div className="w-full sm:w-auto text-center">
-            <Button className="w-full sm:w-48 m-4">
-              Start Interview
-            </Button>
-          <Button variant="destructive" className="w-full sm:w-48">
+          <Button
+            className="w-full sm:w-48 m-4"
+            onClick={startInterview}
+            disabled={isCalling || !PUBLIC_VAPI_KEY || loading}
+          >
+            {loading ? "Loading..." : isCalling ? "Interview In Progress" : "Start Interview"}
+          </Button>
+
+          <Button variant="destructive" className="w-full sm:w-48" onClick={stopInterview} disabled={!isCalling}>
             Leave Interview
           </Button>
         </div>
-
-        {/* Toggle Buttons */}
-        {/* <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-          <Button onClick={() => setBotSpeaking(!botSpeaking)}>
-            {botSpeaking ? "Stop Bot Speaking" : "Start Bot Speaking"}
-          </Button>
-          <Button
-            onClick={() => setUserSpeaking(!userSpeaking)}
-            variant="secondary"
-          >
-            {userSpeaking ? "Stop User Speaking" : "Start User Speaking"}
-          </Button>
-        </div> */}
       </div>
     </div>
   );
-
 }

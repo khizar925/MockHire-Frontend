@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const SERVER_ORIGIN = import.meta.env.VITE_SERVER_ORIGIN;
 
 export default function Contact() {
     const [formData, setFormData] = useState({
@@ -11,15 +14,37 @@ export default function Contact() {
         email: "",
         query: "",
     });
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Contact Form Submitted:", formData);
-        // TODO: send to backend or email service
+        if (!formData.name || !formData.email || !formData.query) {
+            setMessage("Fill All Fields!");
+            setTimeout(() => setMessage(""), 3000);
+            return;
+        }
+        try {
+            setLoading(true);
+            const response = await axios.post(`${SERVER_ORIGIN}/api/contact`, formData);
+
+            if (response.status === 200 || response.status === 201) {
+                setMessage("✅ Feedback submitted successfully!");
+                setFormData({ name: "", email: "", query: "" });
+            } else {
+                setMessage("❌ Failed to submit feedback.");
+            }
+        } catch (error) {
+            setMessage("❌ Error submitting feedback.");
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setTimeout(() => setMessage(""), 3000);
+        }
     };
 
     return (
@@ -38,7 +63,6 @@ export default function Contact() {
                                 placeholder="Your name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="focus:outline-none focus:ring-0 focus:border-none"
                             />
                         </div>
                         <div className="space-y-2">
@@ -50,7 +74,6 @@ export default function Contact() {
                                 placeholder="you@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="focus:outline-none focus:ring-0 focus:border-none"
                             />
                         </div>
                         <div className="space-y-2">
@@ -61,14 +84,15 @@ export default function Contact() {
                                 placeholder="Type your message here..."
                                 value={formData.query}
                                 onChange={handleChange}
-                                className="focus:outline-none focus:ring-0 focus:border-none"
                             />
                         </div>
+                        {message && <div className="text-sm text-red-500">{message}</div>}
                         <Button
                             type="submit"
-                            className="w-full focus:outline-none focus:ring-0 focus:border-none bg-blue-500 hover:bg-blue-400"
+                            disabled={loading}
+                            className="w-full bg-blue-500 hover:bg-blue-400"
                         >
-                            Submit
+                            {loading ? "Submitting..." : "Submit"}
                         </Button>
                     </form>
                 </CardContent>
