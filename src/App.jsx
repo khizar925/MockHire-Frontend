@@ -35,7 +35,7 @@ function App() {
         path="/sign-in/*"
         element={
           <AuthPageWrapper>
-            <SignIn routing="path" path="/sign-in" afterSignInUrl="/dashboard" />
+            <SignIn routing="path" path="/sign-in" afterSignInUrl="/dashboard" redirectUrl="/dashboard" />
           </AuthPageWrapper>
         }
       />
@@ -43,7 +43,7 @@ function App() {
         path="/sign-up/*"
         element={
           <AuthPageWrapper>
-            <SignUp routing="path" path="/sign-up" afterSignUpUrl="/dashboard" />
+            <SignUp routing="path" path="/sign-up" afterSignInUrl="/dashboard" redirectUrl="/dashboard" />
           </AuthPageWrapper>
         }
       />
