@@ -124,9 +124,17 @@ function InterviewForm({ onClose, interviewData = [] }) {
 
 // Dashboard Component
 export default function Dashboard() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [interviews, setInterviews] = useState([]);
   const [modalshow, setModalShow] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (location.search) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     const fetchInterviews = async () => {
