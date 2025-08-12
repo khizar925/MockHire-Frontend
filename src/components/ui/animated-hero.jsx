@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { MoveRight, PhoneCall } from "lucide-react";
 import { Link } from "react-router-dom"
 import { Button } from "./button-21";
-import { SignedIn , SignedOut } from "@clerk/clerk-react";
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
 
 function Hero() {
     const [titleNumber, setTitleNumber] = useState(0);
@@ -67,9 +67,11 @@ function Hero() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3">
-                        <Button size="lg" className="gap-4 bg-blue-400" variant="outline">
-                            Jump on a call <PhoneCall className="w-4 h-4" />
-                        </Button>
+                        <Link to={"/dashboard"}>
+                            <Button size="lg" className="gap-4 bg-blue-400" variant="outline">
+                                Jump on a call <PhoneCall className="w-4 h-4" />
+                            </Button>
+                        </Link>
                         <SignedIn>
                             <Link to="/dashboard">
                                 <Button size="lg" className="gap-4">

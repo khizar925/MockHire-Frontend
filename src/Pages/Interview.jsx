@@ -200,13 +200,16 @@ export default function Interview() {
       setFullTranscript(joinedTranscript);
 
       // Step 3: Ask backend for analysis
+      console.log(JSON.stringify({ transcript: joinedTranscript }));
       const response = await fetch(`${SERVER_ORIGIN}/api/transcript`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript: joinedTranscript }),
       });
 
-      if (!response.ok) throw new Error("Failed to get interview analysis");
+      if (!response.ok) {
+        throw new Error("Failed to get interview analysis");
+      }
 
       const analysisResult = await response.json();
 
@@ -220,7 +223,14 @@ export default function Interview() {
 
     } catch (error) {
       console.error("Failed to stop interview or fetch analysis", error);
+      setErrorMsg("Failed to get interview analysis");
+
+      // Wait 3 seconds so the user can see the error message before redirecting
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 3000);
     }
+
   };
 
   return (
