@@ -140,6 +140,7 @@ export default function Dashboard() {
     const fetchInterviews = async () => {
       try {
         setLoading(true);
+        console.log("SERVER_ORIGIN:", SERVER_ORIGIN);
         const response = await axios.get(`${SERVER_ORIGIN}/api/interviews`);
         setInterviews(response.data.data);
       } catch (error) {
