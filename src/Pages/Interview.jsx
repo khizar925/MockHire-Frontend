@@ -325,7 +325,7 @@ export default function Interview() {
         ) : null}
 
         {/* Interview Control Buttons */}
-        <div className="w-full flex flex-col sm:flex-row sm:justify-center sm:items-center gap-4 m-4">
+        <div className="w-full flex flex-col items-center gap-3 px-4 sm:flex-row sm:justify-center">
           <Button
             className="w-full sm:w-48"
             onClick={startInterview}
