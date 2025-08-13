@@ -299,7 +299,6 @@ export default function Interview() {
           </div>
         </div>
 
-        {/* Transcript will be collected silently and saved on end; no live subtitles */}
         {errorMsg ? (
           <div className="w-full max-w-[1140px] mx-auto text-center text-sm text-red-600">{errorMsg}</div>
         ) : null}
@@ -326,19 +325,29 @@ export default function Interview() {
         ) : null}
 
         {/* Interview Control Buttons */}
-        <div className="w-full sm:w-auto text-center">
+        <div className="w-full flex flex-col sm:flex-row sm:justify-center sm:items-center gap-4 m-4">
           <Button
-            className="w-full sm:w-48 m-4"
+            className="w-full sm:w-48"
             onClick={startInterview}
             disabled={isCalling || !PUBLIC_VAPI_KEY || loading}
           >
-            {loading ? "Loading..." : isCalling ? "Interview In Progress" : "Start Interview"}
+            {loading
+              ? "Loading..."
+              : isCalling
+                ? "Interview In Progress"
+                : "Start Interview"}
           </Button>
 
-          <Button variant="destructive" className="w-full sm:w-48" onClick={stopInterview} disabled={!isCalling}>
+          <Button
+            variant="destructive"
+            className="w-full sm:w-48"
+            onClick={stopInterview}
+            disabled={!isCalling}
+          >
             Leave Interview
           </Button>
         </div>
+
       </div>
     </div>
   );
